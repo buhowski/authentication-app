@@ -1,4 +1,4 @@
-## SIMPLE KEYPRESS MOVEMENT APP
+## INFINITE IMAGE GALLERY APP
 
 1. Install dependencies: `npm install` or `yarn`
 

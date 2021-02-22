@@ -1,66 +1,84 @@
-import React, { useEffect, useRef } from 'react';
-import './App.css';
-import useMovement from './useMovement';
+import React, { useState, useEffect } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import "./App.css";
+
+const accessKey = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 export default function App() {
-  const canvasRef = useRef(null);
-  const linkDownRef = useRef(null);
-  const linkUpRef = useRef(null);
-  const linkRightRef = useRef(null);
-  const linkLeftRef = useRef(null);
-  const {x, y, direction, move} = useMovement();
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
 
-  // set height and width of canvas
   useEffect(() => {
-    const context = canvasRef.current.getContext('2d');
-    context.canvas.height = window.innerHeight;
-    context.canvas.width = window.innerWidth;
-  }, []);
+    getPhotos();
+  }, [page]);
 
-  // move the box if x or y changes
-  useEffect(() => {
-    const context = canvasRef.current.getContext('2d');
-    context.clearRect(0, 0, window.innerHeight * 100, window.innerWidth * 100);
-    // context.fillRect(x, y, 100, 100);
+  function getPhotos() {
+    let apiUrl = `https://api.unsplash.com/photos?`;
+    if (query) apiUrl = `https://api.unsplash.com/search/photos?query=${query}`;
+    apiUrl += `&page=${page}`;
+    apiUrl += `&client_id=${accessKey}`;
 
-    let theLinkRef;
-    if (direction === 'down') theLinkRef = linkDownRef;
-    if (direction === 'up') theLinkRef = linkUpRef;
-    if (direction === 'left') theLinkRef = linkLeftRef;
-    if (direction === 'right') theLinkRef = linkRightRef;
+    fetch(apiUrl)
+      .then((res) => res.json())
+      .then((data) => {
+        const imagesFromApi = data.results ?? data;
 
-    context.drawImage(theLinkRef.current, x, y);
-  }, [x, y])
+        // if page is 1, then we need a new array of images
+        if (page === 1) setImages(imagesFromApi);
 
+        // if page > 1, then we are adding for our infinite scroll
+        setImages((images) => [...images, ...imagesFromApi]);
+      });
+  }
+
+  function searchPhotos(e) {
+    e.preventDefault();
+    setPage(1);
+    getPhotos();
+  }
+
+  // return an error if there is no access key
+  if (!accessKey) {
+    return (
+      <a href="https://unsplash.com/developers" className="error">
+        Required: Get Your Unsplash API Key First
+      </a>
+    );
+  }
   return (
     <div className="app">
-      <canvas ref={canvasRef} />
+      <h1>Image Gallery</h1>
 
-      <div className="arrows">
-        <button onClick={() => move('up')}>Up</button>
-        <button onClick={() => move('left')}>Left</button>
-        <button onClick={() => move('down')}>Down</button>
-        <button onClick={() => move('right')}>Right</button>
-      </div>
-
-      <div className="images">
-        <img 
-          ref={linkDownRef} 
-          src="https://i.imgur.com/JYUB0m3.png" 
-          alt="Down" />
-        <img 
-          ref={linkRightRef} 
-          src="https://i.imgur.com/GEXD7bk.gif" 
-          alt="Right" />
-        <img 
-          ref={linkUpRef} 
-          src="https://i.imgur.com/XSA2Oom.gif" 
-          alt="Up" />
-        <img 
-          ref={linkLeftRef} 
-          src="https://i.imgur.com/4LGAZ8t.gif" 
-          alt="Left" />
-      </div>
+      <form onSubmit={searchPhotos}>
+        <input
+          type="text"
+          placeholder="search ..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button>Search</button>
+      </form>
+      <InfiniteScroll
+        dataLength={images.length} //This is important field to render the next data
+        next={() => setPage((page) => page + 1)}
+        hasMore={true}
+        loader={<h4>Loading...</h4>}
+      >
+        <div className="image-grid">
+          {images.map((image, index) => (
+            <a
+              className="image"
+              key={index}
+              href={image.links.html}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src={image.urls.regular} alt={image.alt_description} />
+            </a>
+          ))}
+        </div>
+      </InfiniteScroll>
     </div>
   );
 }
