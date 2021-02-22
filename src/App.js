@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "./App.css";
 
-const accessKey = e2t7y8D9c1lJdoCzaZ5fsrX3UF0BFEq6XP0IGNPbTa0;
+const accessKey = "e2t7y8D9c1lJdoCzaZ5fsrX3UF0BFEq6XP0IGNPbTa0";
 // const accessKey = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 export default function App() {
