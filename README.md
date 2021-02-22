@@ -1,4 +1,4 @@
-## INFINITE IMAGE GALLERY APP
+## TRIVIA GAME
 
 1. Install dependencies: `npm install` or `yarn`
 
