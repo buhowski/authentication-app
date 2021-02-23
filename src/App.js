@@ -1,56 +1,47 @@
-import React, { useState } from 'react';
-import Question from './components/Question';
-import CategorySelector from './components/CategorySelector';
-import ResultModal from './components/ResultModal';
-import Scoreboard from './components/Scoreboard';
-import useTrivia from './useTrivia';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import SiteHeader from './components/SiteHeader';
+import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
+import PrivateRoute from './components/PrivateRoute';
 import './App.css';
+// import { useAuth0 } from './contexts/auth0-context';
 
 export default function App() {
-	const { question, getQuestion, category, setCategory } = useTrivia();
-	const [isCorrect, setIsCorrect] = useState(null);
+	// const { getToken } = useAuth0();
 
-	function handleQuestionAnswered(answer) {
-		const isAnswerCorrect = answer === question.correct_answer;
-		setIsCorrect(isAnswerCorrect);
-	}
+	// useEffect(() => {
+	// 	getUserData();
+	// }, []);
 
-	function handleNextQuestion() {
-		setIsCorrect(null);
-		getQuestion();
-	}
+	// async function getUserData() {
+	// 	const token = await getToken();
+
+	// 	console.log(token);
+	// 	const response = await fetch('http://example.com/api', {
+	// 		headers: { Authorization: `Bearer ${token}` },
+	// 	});
+	// 	const data = await response.json();
+
+	// 	// data here
+	// }
 
 	return (
-		<div className="app">
-			{/* show the result modal ----------------------- */}
-			{isCorrect !== null && (
-				<ResultModal
-					isCorrect={isCorrect}
-					question={question}
-					getQuestion={handleNextQuestion}
-				/>
-			)}
+		<Router>
+			<div className="app">
+				{/* site header */}
+				<SiteHeader />
 
-			{/* question header ----------------------- */}
-			<div className="question-header">
-				<CategorySelector category={category} chooseCategory={setCategory} />
-				<Scoreboard isCorrect={isCorrect} />
+				{/* routes */}
+				<Switch>
+					<PrivateRoute path="/dashboard">
+						<Dashboard />
+					</PrivateRoute>
+					<Route path="/" exact={true}>
+						<Home />
+					</Route>
+				</Switch>
 			</div>
-
-			{/* the question itself ----------------------- */}
-			<div className="question-main">
-				{question && (
-					<Question
-						question={question}
-						answerQuestion={handleQuestionAnswered}
-					/>
-				)}
-			</div>
-
-			{/* question footer ----------------------- */}
-			<div className="question-footer">
-				<button onClick={handleNextQuestion}>Go to next question 👉</button>
-			</div>
-		</div>
+		</Router>
 	);
 }

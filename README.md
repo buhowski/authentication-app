@@ -1,4 +1,4 @@
-## TRIVIA GAME
+## AUTHENTICATION APP
 
 1. Install dependencies: `npm install` or `yarn`
 
